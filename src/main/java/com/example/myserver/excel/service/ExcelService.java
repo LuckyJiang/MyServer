@@ -3,7 +3,7 @@ package com.example.myserver.excel.service;
 
 import com.alibaba.excel.metadata.CellExtra;
 import com.alibaba.excel.read.metadata.ReadSheet;
-import com.example.myserver.excel.util.ExcelUtil;
+import com.example.myserver.util.ExcelUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
