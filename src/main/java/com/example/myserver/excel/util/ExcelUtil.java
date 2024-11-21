@@ -1,13 +1,11 @@
-package com.example.myserver.util;
+package com.example.myserver.excel.util;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.enums.CellExtraTypeEnum;
-import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.read.metadata.ReadSheet;
-import com.rzon.exam.exception.BadInputParameterException;
-import com.rzon.exam.exception.InternalServerException;
-import org.apache.poi.openxml4j.util.ZipSecureFile;
+import com.example.myserver.exception.BadInputParameterException;
+import com.example.myserver.exception.InternalServerException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -31,6 +29,59 @@ public final class ExcelUtil {
                 .sheetList();
         return readSheets;
     }
+
+    public static List<ReadSheet> getReadSheets(final MultipartFile file) {
+        try (InputStream is = file.getInputStream()) {
+            return EasyExcel.read(is)
+                    .build()
+                    .excelExecutor()
+                    .sheetList();
+        } catch (IOException e) {
+            throw new InternalServerException("解析文件失败");
+        }
+
+    }
+
+    /**
+     *
+     * @param readSheet
+     * @param file
+     * @param headNum : 表头占的行数。
+     */
+    public static void readSheet(final ReadSheet readSheet,
+                                 final ReadListener<?> listener,
+                                 final MultipartFile file,
+                                 final Integer headNum) {
+        try (InputStream is = file.getInputStream()) {
+            EasyExcel.read(is, listener)
+                    .headRowNumber(Objects.isNull(headNum) ? 1 : headNum)
+                    .extraRead(CellExtraTypeEnum.MERGE)
+                    .sheet(readSheet.getSheetNo())
+                    .autoTrim(true)
+                    .doRead();
+        } catch (IOException e) {
+            throw new InternalServerException("解析文件失败");
+        }
+    }
+
+    /**
+     *
+     * @param readSheet
+     * @param file
+     * @param headNum : 表头占的行数。
+     */
+    public static void readSheet(final ReadSheet readSheet,
+                                 final ReadListener<?> listener,
+                                 final Path file,
+                                 final Integer headNum) {
+        EasyExcel.read(file.toFile(), listener)
+                .headRowNumber(Objects.isNull(headNum) ? 1 : headNum)
+                .extraRead(CellExtraTypeEnum.MERGE)
+                .sheet(readSheet.getSheetNo())
+                .autoTrim(true)
+                .doRead();
+    }
+    
     
 
     public static <T> List<T> readSheet(final ReadSheet readSheet, final Class<T> tClass, final File file) {
@@ -68,6 +119,14 @@ public final class ExcelUtil {
             throw new InternalServerException("解析文件失败");
         }
     }
+
+    public static void readSheet(final File file,  final String sheetName, final ReadListener<?> listener) {
+        EasyExcel.read(file, listener)
+                .extraRead(CellExtraTypeEnum.MERGE)
+                .sheet(sheetName)
+                .autoTrim(true)
+                .doRead();
+    }
     
     public static void readSheet(final String sheetName, final File file, final ReadListener<?> readListener) {
         EasyExcel.read(file, readListener)
@@ -76,16 +135,5 @@ public final class ExcelUtil {
                 .doRead();
     }
 
-
-    public static void readFile(final MultipartFile file, final ReadListener<?> listener) {
-        try (InputStream is = file.getInputStream()) {
-            // 延迟解析比率（当文件太大时，会出现Zip bomb detected错误）
-            ZipSecureFile.setMinInflateRatio(-1.0d);
-            final ExcelReaderBuilder builder = EasyExcel.read(is, listener);
-            builder.autoTrim(true).doReadAll();
-        } catch (IOException e) {
-            throw new InternalServerException("解析文件失败");
-        }
-    }
 
 }
