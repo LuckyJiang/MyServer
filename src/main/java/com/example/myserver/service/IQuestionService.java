@@ -3,6 +3,8 @@ package com.example.myserver.service;
 import com.example.myserver.entity.Question;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  * 试题表 服务类
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IQuestionService extends IService<Question> {
 
+    List<Question> getByPointIds(List<String> pointIdList);
 }

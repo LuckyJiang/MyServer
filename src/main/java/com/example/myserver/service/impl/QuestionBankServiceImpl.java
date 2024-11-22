@@ -54,12 +54,6 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
      * @return
      */
     private static String getStringOfMysql() {
-//        String customOrderClause = "ORDER BY " +
-//                "CASE " +
-//                "    WHEN NAME REGEXP '^[0-9]+$' THEN CAST(NAME AS SIGNED) " +
-//                "    ELSE NAME" +
-//                "END, " +
-//                "NAME"; 
         String customOrderClause =  "ORDER BY " +
                 "CAST(NULLIF(SUBSTRING_INDEX(NAME, REGEXP_REPLACE(NAME, '[^0-9]', ''), -1), '') AS SIGNED), " +
                 "REGEXP_REPLACE(NAME, '[0-9]', '')";
