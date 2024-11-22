@@ -9,3 +9,14 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  # 数据库配置
+  datasource:
+    # MySQL 数据库配置
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://10.1.1.174:3306/MYSERVER?serverTimezone=Asia/Shanghai&useSSL=false&useUnicode=true&characterEncoding=utf8&tinyInt1isBit=false&allowMultiQueries=true&rewriteBatchedStatements=true
+    username: root
+    password: root
+  # flyway
+  flyway:
+    enabled: true
+    locations: classpath:database
