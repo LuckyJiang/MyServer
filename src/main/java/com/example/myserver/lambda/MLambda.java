@@ -57,4 +57,14 @@ public class MLambda {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * list按照code字段进行分组
+     * @param banks
+     * @return
+     */
+    public Map<String, List<QuestionBank>> groupList(List<QuestionBank> banks) {
+        return banks.stream()
+                .collect(Collectors.groupingBy(QuestionBank::getCode));
+    }
+
 }
