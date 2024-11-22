@@ -1,4 +1,11 @@
 server:
   servlet:
-    context-path: /My
-    port: 8080
+    port: 10000
+knife4j:
+  # 生产环境关闭knife4j
+  enable: true
+
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
