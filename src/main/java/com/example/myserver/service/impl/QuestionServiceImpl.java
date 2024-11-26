@@ -24,7 +24,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     private static final Integer MAX_COUNT = 1000;
 
     /**
-     * Mybatisplus：实现根据id列表筛选数据，列表长度不能超过1000
+     * MybatisPlus：实现根据id列表筛选数据，列表长度不能超过1000
      * @param pointIdList
      * @return
      */

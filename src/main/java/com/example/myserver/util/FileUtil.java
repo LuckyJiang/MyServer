@@ -39,7 +39,15 @@ public final class FileUtil {
 
     public static Path createTempFile(final String fileName) {
         final Path resolve = TEMP_FOLDER.resolve(fileName);
-        delete(resolve);
+        if (Files.exists(resolve)) {
+            delete(resolve);
+        } else {
+            try {
+                Files.createDirectory(resolve);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return resolve;
     }
 
