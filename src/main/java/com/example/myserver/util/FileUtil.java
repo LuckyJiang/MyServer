@@ -41,12 +41,11 @@ public final class FileUtil {
         final Path resolve = TEMP_FOLDER.resolve(fileName);
         if (Files.exists(resolve)) {
             delete(resolve);
-        } else {
-            try {
-                Files.createDirectory(resolve);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        } 
+        try {
+            Files.createDirectory(resolve);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
         return resolve;
     }
