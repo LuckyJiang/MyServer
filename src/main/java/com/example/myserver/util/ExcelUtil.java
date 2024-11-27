@@ -1,9 +1,12 @@
 package com.example.myserver.util;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.enums.CellExtraTypeEnum;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.read.metadata.ReadSheet;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.metadata.WriteTable;
 import com.example.myserver.exception.BadInputParameterException;
 import com.example.myserver.exception.InternalServerException;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,6 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -135,5 +140,44 @@ public final class ExcelUtil {
                 .doRead();
     }
 
+    public static ExcelWriter getExcelWriter(final File file) {
+        return EasyExcel.write(file).build();
+    }
+
+    /**
+     * 相当于导入了两个table,第一个table有表头没有没有数据，第二个table有表头有数据。
+     * @param sheetName
+     * @param excelWriter
+     * @param data
+     */
+    public static void exportToExcel(final String sheetName,
+                                     final ExcelWriter excelWriter,
+                                     final Class clazz,
+                                     final List<?> data) {
+        final WriteSheet writeSheet = EasyExcel.writerSheet(sheetName).needHead(Boolean.FALSE).build();
+        final WriteTable talePartOne = EasyExcel.writerTable(0)
+                .head(getHead(sheetName, 26))
+                .needHead(Boolean.TRUE)
+                .build();
+        excelWriter.write(new ArrayList<>(), writeSheet, talePartOne);
+        final WriteTable talePartTwo = EasyExcel.writerTable(1)
+                .head(clazz)
+                .relativeHeadRowIndex(0)
+                .needHead(Boolean.TRUE)
+                .build();
+        excelWriter.write(data, writeSheet, talePartTwo);
+    }
+
+    private static List<List<String>> getHead(final String firstRow, final Integer num) {
+        final List<List<String>> list = new ArrayList<List<String>>();
+        for (int i = 0; i < num; i++) {
+            list.add(Arrays.asList(firstRow));
+        }
+        return list;
+    }
+
+    public static void closeExcelWriter(final ExcelWriter excelWriter) {
+        excelWriter.finish();
+    }
 
 }
