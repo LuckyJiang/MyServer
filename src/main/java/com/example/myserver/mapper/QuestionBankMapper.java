@@ -1,6 +1,6 @@
 package com.example.myserver.mapper;
 
-import com.example.myserver.entity.QuestionBank;
+import com.example.myserver.common.entity.QuestionBank;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

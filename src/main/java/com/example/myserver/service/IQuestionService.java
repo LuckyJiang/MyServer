@@ -1,6 +1,6 @@
 package com.example.myserver.service;
 
-import com.example.myserver.entity.Question;
+import com.example.myserver.common.entity.Question;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.example.myserver.lambda;
 
 
-import com.example.myserver.entity.QuestionBank;
+import com.example.myserver.common.entity.QuestionBank;
 
 import java.util.List;
 import java.util.Map;

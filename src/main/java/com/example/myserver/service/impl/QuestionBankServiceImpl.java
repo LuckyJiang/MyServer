@@ -1,7 +1,7 @@
 package com.example.myserver.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.example.myserver.entity.QuestionBank;
+import com.example.myserver.common.entity.QuestionBank;
 import com.example.myserver.mapper.QuestionBankMapper;
 import com.example.myserver.service.IQuestionBankService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

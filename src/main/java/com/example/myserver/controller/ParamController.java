@@ -1,7 +1,7 @@
 package com.example.myserver.controller;
 
 
-import com.example.myserver.entity.QuestionBank;
+import com.example.myserver.common.entity.QuestionBank;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

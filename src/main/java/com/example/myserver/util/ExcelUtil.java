@@ -7,8 +7,8 @@ import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.read.metadata.ReadSheet;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.alibaba.excel.write.metadata.WriteTable;
-import com.example.myserver.exception.BadInputParameterException;
-import com.example.myserver.exception.InternalServerException;
+import com.example.myserver.common.exception.BadInputParameterException;
+import com.example.myserver.common.exception.InternalServerException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
