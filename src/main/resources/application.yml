@@ -1,6 +1,8 @@
 server:
+  # 服务端口号
+  port: 10000
   servlet:
-    port: 10000
+    context-path: /my
 knife4j:
   # 生产环境关闭knife4j
   enable: true
