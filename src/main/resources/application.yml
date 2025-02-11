@@ -22,3 +22,7 @@ spring:
   flyway:
     enabled: true
     locations: classpath:database
+
+my:
+  # 调用接口间隔时间（默认每4小时执行一次）
+  cron: 0 0 */4 * * ?

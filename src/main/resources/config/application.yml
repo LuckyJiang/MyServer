@@ -1,5 +1,6 @@
 spring:
   kafka:
+    enabled: false
     bootstrap-servers: 10.1.1.174:9092
     producer:
       batch-size: 16384 #批量大小

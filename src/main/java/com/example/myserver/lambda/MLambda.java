@@ -2,6 +2,7 @@ package com.example.myserver.lambda;
 
 
 import com.example.myserver.common.entity.QuestionBank;
+import org.apache.commons.collections4.ListUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,17 @@ public class MLambda {
     public Map<String, List<QuestionBank>> groupList(List<QuestionBank> banks) {
         return banks.stream()
                 .collect(Collectors.groupingBy(QuestionBank::getCode));
+    }
+
+    /**
+     * list进行分组，每组有100个对象
+     * @param banks
+     * @return
+     */
+    public void groupBySize(List<QuestionBank> banks) {
+        ListUtils.partition(banks, 10).stream().forEach(tags -> {
+            System.out.println(tags);
+        });
     }
 
 }
