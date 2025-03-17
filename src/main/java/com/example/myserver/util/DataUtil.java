@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
  * @author by Jiang Xiaomin
  * @desrc:
  */
-public final class DataConvertUtil {
-    private DataConvertUtil() {
+public final class DataUtil {
+    private DataUtil() {
     }
 
     public static <T> T mapToObject(final Map<String, Object> map, final Class<T> clazz) {
