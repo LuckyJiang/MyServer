@@ -1,0 +1,863 @@
+<properties>
+    <property name="createIndex">
+        <![CDATA[{
+            "settings": {
+                "index.mapping.total_fields.limit": 100000,
+                "index.max_result_window": 1000000000,
+                "refresh_interval": -1,
+                "analysis": {
+                    "normalizer": {
+                        "lowercase": {
+                            "type": "custom",
+                            "filter": [
+                                "lowercase"
+                            ]
+                        }
+                    },
+                    "analyzer": {
+                        "char_analyzer": {
+                            "tokenizer": "char_tokenizer",
+                            "filter": "lowercase"
+                        }
+                    },
+                    "tokenizer": {
+                        "char_tokenizer": {
+                            "type": "pattern",
+                            "pattern": "|"
+                        }
+                    }
+                }
+            },
+            "mappings": {
+                "date_detection": false,
+                    "dynamic_templates": [{
+                        "strings": {
+                            "match_mapping_type": "string",
+                            "mapping": {
+                                "type": "text",
+                                "analyzer": "char_analyzer",
+                                "fields": {
+                                    "keyword": {
+                                      "type":  "keyword",
+                                      "normalizer": "lowercase"
+                                    },
+                                    "text": {
+                                      "type":  "text",
+                                      "analyzer": "char_analyzer"
+                                    }
+                                }
+                            }
+                        }
+                    }],
+                    "dynamic": "strict",
+                    "properties": {
+                        "tag": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                },
+                                "text": {
+                                    "type": "text",
+                                    "analyzer": "char_analyzer"
+                                }
+                            },
+                            "analyzer":"char_analyzer"
+                        },
+                        "compositions": {
+                            "type":"text",
+                            "fields":{
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                },
+                                "text": {
+                                    "type": "text",
+                                    "analyzer": "char_analyzer"
+                                }
+                            },
+                            "analyzer":"char_analyzer"
+                        },
+                        "categories": {
+                            "type":"text",
+                            "fields":{
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                },
+                                "text": {
+                                    "type": "text",
+                                    "analyzer": "char_analyzer"
+                                }
+                            },
+                            "analyzer":"char_analyzer"
+                        },
+                        "properties": {
+                            "dynamic": "true",
+                            "type": "object"
+                        }
+                    }
+            }
+        }]]>
+    </property>
+
+    <property name="createDocumentIndex">
+        <![CDATA[{
+            "settings": {
+                "index.mapping.total_fields.limit": 100000,
+                "index.mapping.nested_fields.limit": 1000,
+                "index.max_result_window": 10000,
+                "refresh_interval": -1,
+                "analysis": {
+                    "normalizer": {
+                        "lowercase": {
+                            "type": "custom",
+                            "filter": [
+                                "lowercase"
+                            ]
+                        }
+                    },
+                    "analyzer": {
+                        "char_analyzer": {
+                            "tokenizer": "char_tokenizer",
+                            "filter": "lowercase"
+                        }
+                    },
+                    "tokenizer": {
+                        "char_tokenizer": {
+                            "type": "pattern",
+                            "pattern": "|"
+                        }
+                    }
+                }
+            },
+            "mappings": {
+                "_doc": {
+                    "date_detection": false,
+                    "dynamic": "strict",
+                    "properties": {
+                        "name": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                },
+                                "text": {
+                                    "type": "text",
+                                    "analyzer": "char_analyzer"
+                                }
+                            },
+                            "analyzer": "char_analyzer"
+                        },
+                        "categories": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                },
+                                "text": {
+                                    "type": "text",
+                                    "analyzer": "char_analyzer"
+                                }
+                            },
+                            "analyzer": "char_analyzer"
+                        },
+                        "properties": {
+                            "dynamic": "true",
+                            "type": "object"
+                        },
+                        "contents": {
+                            "properties": {
+                                "blocks": {
+                                    "type": "nested",
+                                    "properties": {
+                                        "pageNumber": {
+                                            "type": "integer"
+                                        },
+                                        "location": {
+                                            "type": "keyword"
+                                        },
+                                        "text": {
+                                            "type": "text",
+                                            "analyzer": "char_analyzer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }]]>
+    </property>
+
+    <property name="queryContentText">
+        <![CDATA[{
+            "from": #[from],
+            "size": #[size],
+            "_source": {
+                "excludes": ["properties", "contents"]
+            },
+            "query": {
+                "bool": {
+                    "should": [
+                        {
+                            "query_string": {
+                                "query": #[keywords],
+                                "type": "phrase",
+                                "default_operator": "OR",
+                                "fields": ["name"]
+                            }
+                        },
+                        {
+                            "nested": {
+                                "path": "contents.blocks",
+                                "query": {
+                                    "query_string": {
+                                        "query": #[keywords],
+                                        "type": "phrase",
+                                        "default_operator": "OR",
+                                        "fields": ["contents.blocks.text"]
+                                    }
+                                },
+                                "inner_hits": {
+                                    "highlight": {
+                                        "order": "score",
+                                        "pre_tags": [#[highlightClass]],
+                                        "post_tags": [
+                                            "</span>"
+                                        ],
+                                        "fields": [
+                                            {
+                                                "contents.blocks.text": {
+                                                    "fragment_size": #[fragmentSize],
+                                                    "number_of_fragments": #[numberOfFragments]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "highlight": {
+                "order": "score",
+                "pre_tags": [#[highlightClass]],
+                "post_tags": [
+                    "</span>"
+                ],
+                "fields": [
+                    {
+                        "name": {
+                          "fragment_size": #[fragmentSize],
+                          "number_of_fragments": #[numberOfFragments]
+                        }
+                    }
+                ]
+            }
+        }]]>
+    </property>
+
+    <property name="queryItemsByItemIdsOrCategories">
+        <![CDATA[{
+            #set( $hasItemIds = false )
+            #set( $hasTags = false )
+            "size": #[size],
+            "query" : {
+                "bool": {
+                    "must": [
+                         #if($tags && $tags.size() > 0)
+                         #set( $hasTags = true )
+                            {
+                                "terms": {
+                                    "tag.keyword": #[tags,serialJson=true]
+                                }
+                            }
+                        #end
+
+                        #if($itemIds && $itemIds.size() > 0)
+                        #if($hasTags),#end
+                        #set( $hasItemIds = true )
+                            {
+                                "terms": {
+                                    "_id": #[itemIds,serialJson=true]
+                                }
+                            }
+                        #end
+
+                        #if($categories && $categories.size() > 0)
+                        #if($hasItemIds || $hasTags),#end
+                            {
+                                "terms": {
+                                    "categories.keyword": #[categories,serialJson=true]
+                                }
+                            }
+                         #end
+                    ]
+                }
+            }
+	    }]]>
+    </property>
+
+    <!--  批量获取reference相关索引  -->
+    <property name="queryReferencesBySourceDocumentIdAndOther">
+        <![CDATA[{
+            #set( $hasTags = false )
+            "size": #[size],
+            "query": {
+                "bool": {
+                    "must": [
+                        #if($sourceDocumentId)
+                        #set( $hasTags = true )
+                            {
+                                "term": {
+                                    "sourceDocumentId.keyword": {
+                                        "value": #[sourceDocumentId, serialJson=true]
+                                    }
+                                }
+                            }
+                        #end
+
+                        #if($targetDocumentId )
+                        #if($hasTags),#end
+                        #set( $hasTags = true )
+                            {
+                                "term": {
+                                    "targetDocumentId.keyword": {
+                                        "value": #[targetDocumentId, serialJson=true]
+                                    }
+                                }
+                            }
+                        #end
+
+                        #if($handle)
+                        #if($hasTags),#end
+                        #set( $hasTags = true )
+                            {
+                                "term": {
+                                    "handle.keyword": {
+                                        "value": #[handle, serialJson=true]
+                                    }
+                                }
+                            }
+                        #end
+
+                        #if($targetItemId)
+                        #if($hasTags),#end
+                            {
+                                "term": {
+                                    "targetItemId.keyword": {
+                                        "value": #[targetItemId, serialJson=true]
+                                    }
+                                }
+                            }
+                        #end
+                    ]
+                }
+            }
+	    }]]>
+    </property>
+
+    <property name="createNewReferenceIndex">
+        <![CDATA[{
+            "settings": {
+                "index.mapping.total_fields.limit": 100000,
+                "index.max_result_window": 1000000000,
+                "refresh_interval": -1,
+                "analysis": {
+                    "normalizer": {
+                        "lowercase": {
+                            "type": "custom",
+                            "filter": [
+                                "lowercase"
+                            ]
+                        }
+                    },
+                    "analyzer": {
+                        "char_analyzer": {
+                            "tokenizer": "char_tokenizer",
+                            "filter": "lowercase"
+                        }
+                    },
+                    "tokenizer": {
+                        "char_tokenizer": {
+                            "type": "pattern",
+                            "pattern": "|"
+                        }
+                    }
+                }
+            },
+            "mappings": {
+                "_doc": {
+                    "date_detection": false,
+                    "dynamic": "strict",
+                    "properties": {
+                        "targetItemId": {
+                            "type":"text",
+                            "fields":{
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                }
+                            },
+                            "analyzer":"char_analyzer"
+                        },
+                        "sourceDocumentId": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                }
+                            },
+                            "analyzer":"char_analyzer"
+                        },
+                        "targetDocumentId": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                }
+                            },
+                            "analyzer":"char_analyzer"
+                        },
+                         "handle": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                }
+                            },
+                            "analyzer":"char_analyzer"
+                        },
+                        "handles": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                }
+                            },
+                            "analyzer":"char_analyzer"
+                        }
+                    }
+                }
+            }
+        }]]>
+    </property>
+    <property name="queryReferencesByItemIdsAndSourceDocumentId">
+        <![CDATA[{
+            "size": #[size],
+            "query": {
+                "bool": {
+                    "must": [
+                            {
+                                "term": {
+                                    "sourceDocumentId.keyword": {
+                                            "value": #[sourceDocumentId, serialJson=true]
+                                        }
+                                }
+                            },
+                            {
+                                "terms": {
+                                    "targetItemId.keyword": #[itemIds,serialJson=true]
+                                }
+                            }
+                    ]
+                }
+              }
+	    }]]>
+    </property>
+
+    <property name="createDataViewIndex">
+        <![CDATA[{
+            "settings": {
+                "index.mapping.total_fields.limit": 100000,
+                "index.max_result_window": 1000000000,
+                "refresh_interval": -1,
+                "analysis": {
+                    "normalizer": {
+                        "lowercase": {
+                            "type": "custom",
+                            "filter": [
+                                "lowercase"
+                            ]
+                        }
+                    },
+                    "analyzer": {
+                        "char_analyzer": {
+                            "tokenizer": "char_tokenizer",
+                            "filter": "lowercase"
+                        }
+                    },
+                    "tokenizer": {
+                        "char_tokenizer": {
+                            "type": "pattern",
+                            "pattern": "|"
+                        }
+                    }
+                }
+            },
+            "mappings": {
+                "_doc": {
+                    "date_detection": false,
+                    "dynamic_templates": [{
+                        "strings": {
+                            "match_mapping_type": "string",
+                            "mapping": {
+                                "type": "text",
+                                "analyzer": "char_analyzer",
+                                "fields": {
+                                    "keyword": {
+                                      "type":  "keyword",
+                                      "normalizer": "lowercase"
+                                    },
+                                    "text": {
+                                      "type":  "text",
+                                      "analyzer": "char_analyzer"
+                                    }
+                                }
+                            }
+                        }
+                    }],
+                    "dynamic": "strict",
+                    "properties": {
+                        "repositoryId": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                },
+                                "text": {
+                                    "type": "text",
+                                    "analyzer": "char_analyzer"
+                                }
+                            },
+                            "analyzer": "char_analyzer"
+                        },
+                        "itemId": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                },
+                                "text": {
+                                    "type": "text",
+                                    "analyzer": "char_analyzer"
+                                }
+                            },
+                            "analyzer": "char_analyzer"
+                        },
+                        "tag": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                },
+                                "text": {
+                                    "type": "text",
+                                    "analyzer": "char_analyzer"
+                                }
+                            },
+                            "analyzer":"char_analyzer"
+                        },
+                        "compositions": {
+                            "type":"text",
+                            "fields":{
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                },
+                                "text": {
+                                    "type": "text",
+                                    "analyzer": "char_analyzer"
+                                }
+                            },
+                            "analyzer":"char_analyzer"
+                        },
+                        "categories": {
+                            "type":"text",
+                            "fields":{
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                },
+                                "text": {
+                                    "type": "text",
+                                    "analyzer": "char_analyzer"
+                                }
+                            },
+                            "analyzer":"char_analyzer"
+                        },
+                        "category": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "lowercase"
+                                },
+                                "text": {
+                                    "type": "text",
+                                    "analyzer": "char_analyzer"
+                                }
+                            },
+                            "analyzer":"char_analyzer"
+                        },
+                        "properties": {
+                            "dynamic": "true",
+                            "type": "object"
+                        },
+                        "posterityItems": {
+                            "dynamic": "true",
+                            "type": "nested"
+                        },
+                        "ancestorsItem": {
+                            "properties":{
+                                "itemId": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "normalizer": "lowercase"
+                                        },
+                                        "text": {
+                                            "type": "text",
+                                            "analyzer": "char_analyzer"
+                                        }
+                                    },
+                                    "analyzer": "char_analyzer"
+                                },
+                                "tag": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "normalizer": "lowercase"
+                                        },
+                                        "text": {
+                                            "type": "text",
+                                            "analyzer": "char_analyzer"
+                                        }
+                                    },
+                                    "analyzer":"char_analyzer"
+                                },
+                                "compositions": {
+                                    "type":"text",
+                                    "fields":{
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "normalizer": "lowercase"
+                                        },
+                                        "text": {
+                                            "type": "text",
+                                            "analyzer": "char_analyzer"
+                                        }
+                                    },
+                                    "analyzer":"char_analyzer"
+                                },
+                                "categories": {
+                                    "type":"text",
+                                    "fields":{
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "normalizer": "lowercase"
+                                        },
+                                        "text": {
+                                            "type": "text",
+                                            "analyzer": "char_analyzer"
+                                        }
+                                    },
+                                    "analyzer":"char_analyzer"
+                                },
+                                "category": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "normalizer": "lowercase"
+                                        },
+                                        "text": {
+                                            "type": "text",
+                                            "analyzer": "char_analyzer"
+                                        }
+                                    },
+                                    "analyzer":"char_analyzer"
+                                },
+                                "properties": {
+                                    "dynamic": "true",
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }]]>
+    </property>
+
+    <property name="queryDataViewInfos">
+        <![CDATA[{
+            "size": #[size],
+            #if($from)
+            "from": #[from],
+            #end
+            "query" : {
+                "bool": {
+                    "must": [
+                        #if($items && $items.size() > 0)
+                            #set($needComma = false)
+                            #foreach($item in $items.entrySet())
+                                #if($needComma), #else #set($needComma = true) #end
+                                {
+                                    "terms": {
+                                        "$item.key": #[items[$item.key],serialJson=true]
+                                    }
+                                }
+                            #end
+                        #end
+
+                        #if($itemPros && $itemPros.size() > 0)
+                            #if($items && $items.size() > 0), #end
+                            #set($needComma = false)
+                            #foreach($itemPro in $itemPros.entrySet())
+                                #if($needComma), #else #set($needComma = true) #end
+                                    {
+                                        "match": {
+                                            "$itemPro.key": {
+                                                "query": #[itemPros[$itemPro.key]],
+                                                "operator": "and"
+                                           }
+                                        }
+                                    }
+                            #end
+                        #end
+
+                        #if($ancestorsItem && $ancestorsItem.size() > 0)
+                            #if($items && $items.size() > 0 || $itemPros && $itemPros.size() > 0), #end
+                            #set($needComma = false)
+                            #foreach($ancestors in $ancestorsItem.entrySet())
+                                #if($needComma), #else #set($needComma = true) #end
+                                {
+                                    "terms": {
+                                        "$ancestors.key": #[ancestorsItem[$ancestors.key],serialJson=true]
+                                    }
+                                }
+                            #end
+                        #end
+
+                        #if($ancestorsPros && $ancestorsPros.size() > 0)
+                            #if($items && $items.size() > 0 || $itemPros && $itemPros.size() > 0 || $ancestorsItem && $ancestorsItem.size() > 0), #end
+                            #set($needFirstComma = true)
+                            #set($needComma = false)
+                            #foreach($ancestorsPro in $ancestorsPros.entrySet())
+                                #if($needComma), #else
+                                    {
+                                        "match": {
+                                            "$ancestorsPro.key": {
+                                                "query": #[ancestorsPros[$ancestorsPro.key]],
+                                                "operator": "and"
+                                           }
+                                        }
+                                    }
+                                #set($needComma = true) #end
+                            #end
+                        #end
+
+                        #if($posterityItems && $posterityItems.size() > 0 || $posterityPros && $posterityPros.size()  > 0)
+                            #if($items && $items.size() > 0 || $itemPros && $itemPros.size() > 0 || $ancestorsItem && $ancestorsItem.size() > 0 || $ancestorsPros && $ancestorsPros.size() > 0), #end
+                            {
+                                "nested": {
+                                    "path": "posterityItems",
+                                    "query": {
+                                        "bool":{
+                                            "must":[
+                                                #if($posterityItems && $posterityItems.size() > 0)
+                                                    #set($needComma = false)
+                                                    #foreach($posterity in $posterityItems.entrySet())
+                                                        #if($needComma), #else #set($needComma = true) #end
+                                                            {
+                                                                "terms": {
+                                                                    "$posterity.key": #[posterityItems[$posterity.key],serialJson=true]
+                                                                }
+                                                            }
+                                                    #end
+                                                #end
+
+                                                #if($posterityPros && $posterityPros.size() > 0)
+                                                    #if($posterityItems && $posterityItems.size() > 0), #end
+                                                    #set($needComma = false)
+                                                    #foreach($posterityPro in $posterityPros.entrySet())
+                                                        #if($needComma), #else #set($needComma = true) #end
+                                                            {
+                                                                "match": {
+                                                                    "$posterityPro.key": {
+                                                                        "query": #[posterityPros[$posterityPro.key]],
+                                                                        "operator": "and"
+                                                                   }
+                                                                }
+                                                            }
+                                                    #end
+                                                #end
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        #end
+                    ]
+                }
+            }
+	    }]]>
+
+    </property>
+
+    <property name="queryReferencesByItemIds">
+        <![CDATA[{
+            "size": #[size],
+            "query": {
+                "bool": {
+                    "must": [
+                            {
+                                "terms": {
+                                    "targetItemId.keyword": #[itemIds,serialJson=true]
+                                }
+                            }
+                    ]
+                }
+              }
+	    }]]>
+    </property>
+
+    <property name="queryReferencesBySourceDocIdsOrTargetDocIds">
+        <![CDATA[{
+            "size": #[size],
+            "query": {
+                "bool": {
+                    "should": [
+                            {
+                                "terms": {
+                                    "sourceDocumentId.keyword": #[sourceDocumentIds,serialJson=true]
+                                }
+                            },
+                              {
+                                "terms": {
+                                    "targetDocumentId.keyword": #[targetDocumentIds,serialJson=true]
+                                }
+                            }
+                    ]
+                }
+              }
+	    }]]>
+    </property>
+
+</properties>

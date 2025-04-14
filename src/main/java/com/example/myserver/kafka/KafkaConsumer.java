@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
 public class KafkaConsumer {
     
     //作为消费者监听 镇海传来的数据
-    @KafkaListener(topics = "VIRTUAL_SYSTEM_MESSAGE")
+    /*@KafkaListener(topics = "VIRTUAL_SYSTEM_MESSAGE")
     public void onNormalMessage(final String record) {
         log.info("从镇海传来的数据：{}", record);
-    }
+    }*/
     
 }

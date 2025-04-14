@@ -9,22 +9,27 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.alibaba.excel.write.metadata.WriteTable;
 import com.example.myserver.common.exception.BadInputParameterException;
 import com.example.myserver.common.exception.InternalServerException;
+import com.google.common.collect.ImmutableMap;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public final class ExcelUtil {
 
     private static final Integer DEFAULT_EXCEL_COLUMN_COUNT = 26;
 
     private ExcelUtil() {
+    }
+
+    public static <T> List<T> readExcel(final Path path, final Class<T> tClass) {
+        return EasyExcel.read(path.toFile())
+                .sheet() // 默认读取第一个sheet
+                .head(tClass) // 指定数据模型类
+                .doReadSync(); // 同步读取数据，返回数据列表
     }
 
     public static List<ReadSheet> getReadSheets(final Path tempFile) {
@@ -143,6 +148,7 @@ public final class ExcelUtil {
     public static ExcelWriter getExcelWriter(final File file) {
         return EasyExcel.write(file).build();
     }
+    
 
     /**
      * 相当于导入了两个table,第一个table有表头没有没有数据，第二个table有表头有数据。
@@ -166,6 +172,22 @@ public final class ExcelUtil {
                 .needHead(Boolean.TRUE)
                 .build();
         excelWriter.write(data, writeSheet, talePartTwo);
+    }
+
+    public static void exportToExcel(final File targetFile, 
+                                     final File templateFile, 
+                                     final Class clazz,
+                                     final List<?> data,
+                                     final Map<String, Object> fillData
+    ) {
+        final ExcelWriter excelWriter = EasyExcel.write(targetFile).withTemplate(templateFile).build();
+        final WriteSheet writeSheet = EasyExcel.writerSheet("sheet1")
+                .head(clazz)
+                .relativeHeadRowIndex(1)
+                .needHead(Boolean.TRUE).build();
+        fillData.forEach((key, value) -> excelWriter.fill(ImmutableMap.of(key, value), writeSheet));
+        excelWriter.write(data, writeSheet);
+        excelWriter.finish();
     }
 
     private static List<List<String>> getHead(final String firstRow, final Integer num) {

@@ -30,3 +30,12 @@ spring:
     listener:
       missing-topics-fatal: false # consumer listener topics 不存在时，启动项目不报错
       type: batch #设置批量消费
+  elasticsearch:
+    bboss:
+      elasticUser: my_es
+      elasticPassword: 123456
+      timeoutSocket: 50000
+      elasticsearch:
+        rest:
+          hostNames: http://10.1.1.174:9200
+        showTemplate: true  #否在日志中显示 Elasticsearch 的模板信息

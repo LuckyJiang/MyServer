@@ -28,7 +28,7 @@ public class KafkaService implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         while (true) {
             
-            kafkaProducer.sendNormalMessage(createData());
+//            kafkaProducer.sendNormalMessage(createData());
             Thread.sleep(3000);
         }
     }
